@@ -1,41 +1,36 @@
-# Sentiment analysis is the process of analyzing digital text to determine if the emotional tone of the message is positive, negative, or neutral.
-
 # Import Flask, a lightweight web framework for Python.
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
-# Import TextBlob to help the chatbot understand language nuances
-from textblob import TextBlob # type: ignore
+# Import VADER to help the chatbot understand language nuances
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 
 app = Flask(__name__)
 CORS(app)  # This allows cross-origin requests, which is necessary for development
 
 
-
 # Defining the Chatbot Class for Interaction.
 class ChatBot:
     def __init__(self):
         # Initialize the sentiment analysis tool
-        self.sentiment_analyzer = TextBlob("")
+        self.sentiment_analyzer = SentimentIntensityAnalyzer()
         
               
     def process_input(self, user_input):
-        self.sentiment_analyzer = TextBlob(user_input)
-        sentiment_score = self.sentiment_analyzer.sentiment.polarity
+        sentiment_scores = self.sentiment_analyzer.polarity_scores(user_input)
+        compound_score = sentiment_scores['compound']
 
-        # Analyze the sentiment of the user's input
-        self.sentiment_analyzer = TextBlob(user_input)
-        sentimemnt_score = self.sentiment_analyzer.sentiment.polarity
-        
-        # Generate the chatbot's response based on the sentiment
-        if sentiment_score > 0:
-            response = f"That's great to hear! Sentiment Score: {sentiment_score:.2f}"
-        elif sentiment_score < 0:
-            response = f"I'm sorry to hear that. Would you like me to transfer you to a live agent? Sentiment Score: {sentiment_score:.2f}"
+        # Generate the chatbot's response based on the compound score
+        if compound_score >= 0.05:
+            response = f"That's great to hear! Your message seems positive. Sentiment Score: {compound_score:.2f}"
+        elif compound_score <= -0.05:
+            response = f"I'm sorry to hear that. Your message seems negative. Would you like to talk more about it? Sentiment Score: {compound_score:.2f}"
         else:
-            response = f"Hmm I see. Can you please provide more information? Sentiment Score: {sentiment_score:.2f}"
-
-        # Print the chatbot's response and sentiment
+            response = f"I see. Your message seems neutral. Can you please provide more information? Sentiment Score: {compound_score:.2f}"
+        
+        # Add more detailed sentiment information
+        response += f"\nPositive: {sentiment_scores['pos']:.2f}, Negative: {sentiment_scores['neg']:.2f}, Neutral: {sentiment_scores['neu']:.2f}"
+        
         return response
 
 chatbot = ChatBot()
@@ -47,7 +42,7 @@ def chat():
     return jsonify({'response': response})
 
 # To run this server, you'll need to install Flask and Flask-CORS:
-# pip install flask flask-cors
+# pip install flask flask-cors vaderSentiment
 # python App.py to run
 if __name__ == '__main__':
     app.run(debug=True)
