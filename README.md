@@ -16,12 +16,9 @@ This project is a sentiment analysis chatbot that uses both VADER and Amazon Com
 - NLP: VADER Sentiment Analyzer, Amazon Comprehend
 - AWS Services: Amazon Comprehend
 
-## Setup and Installation
 
 ### Prerequisites
 - Python 3.7+
 - AWS Account with access to Amazon Comprehend
 - Node.js and npm (for frontend development)
 
-### Backend Setup
-1. Clone the repository:
